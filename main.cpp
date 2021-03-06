@@ -13,14 +13,12 @@ using namespace std;
 
 int main()
 {	
-	int should_run = 1;
-
-	while (should_run == 1)
+	while (1)
 	{
-		char* args0[MAXLINE/2+1],* args1[MAXLINE / 2 + 1], * args2[MAXLINE / 2 + 1], * array1[MAXLINE / 2], * array2[MAXLINE / 2];
+		char* args0[MAXLINE/2+1],* args1[MAXLINE / 2 + 1], * args2[MAXLINE / 2 + 1]; 
 		char command1[MAXLINE / 2], command2[MAXLINE / 2];
 		int pid1, pid2;
-		char* pch0, * pch1;
+		char* p_cmd1, * p_cmd2;
 
 		printf("mysh>");
 		fflush(stdout);
@@ -28,62 +26,43 @@ int main()
 		char input[MAXLINE];
 		fgets(input, MAXLINE, stdin);
 
-
 		if (!strcmp(input, "exit\n"))
 		{
-			should_run = 0;
 			break;
 		}
 
-		const int len = strlen(input) - 1;
-		if (input[len] == '\n')
-		{
-			input[len] = '\0';
-		}
+		input[strlen(input) - 1] = 0;
 
 		if (strstr(input, "|"))
-		{
-			//printf("Pipe Confirmed.\n");
+		{			
 
 			char first[MAXLINE / 2], last[MAXLINE / 2];
 			strcpy(first, strtok(input, "|"));
-			strcpy(last, strtok(NULL, "|"));
-
-			//printf("First: %s\n", first);
-			//printf("Last: %s\n", last);
-
-			pch0 = strtok(first, " ");
+			strcpy(last, strtok(NULL, "|"));			
+      //parse input before "|", set values for execvp
+			p_cmd1 = strtok(first, " ");
 			int i = 0;
-			while (pch0 != NULL)
+			while (p_cmd1 != NULL)
 			{
-				array1[i++] = strdup(pch0);
-				pch0 = strtok(NULL, " ");
+				args1[i++] = strdup(p_cmd1);
+				p_cmd1 = strtok(NULL, " ");
 			}
-			strcpy(command1, array1[0]);
-			for (int a = 0; a < i; a++)
-			{
-				args1[a] = array1[a];
-			}
-			args1[i] = NULL;
-
-			pch1 = strtok(last, " ");
+      args1[i] = NULL;
+			strcpy(command1, args1[0]);	
+			//parse input after "|", set values for execvp
+			p_cmd2 = strtok(last, " ");
 			int j = 0;
-			while (pch1 != NULL)
+			while (p_cmd2 != NULL)
 			{
-				array2[j++] = strdup(pch1);
-				pch1 = strtok(NULL, " \n");
+				args2[j++] = strdup(p_cmd2);
+				p_cmd2 = strtok(NULL, " \n");
 			}
-			strcpy(command2, array2[0]);
-			for (int b = 0; b < j; b++)
-			{
-				args2[b] = array1[b];
-			}
-			args2[j] = NULL;
-
+      args2[j] = NULL;
+			strcpy(command2, args2[0]);
+			
 			int pipefd[2];
 			pipe(pipefd);
-
-
+      
 			pid1 = fork();
 
 			if (pid1 == 0)
@@ -107,14 +86,12 @@ int main()
 			wait(&pid2);
 			wait(&pid1);	
 			
-			
 		}
 		else
 		{
 			int child_pid = fork();
 			if (child_pid == 0)
-			{
-				//input[strlen(input) - 1] = 0;
+			{				
 				char* token = strtok(input, " ");
 				int i = 0;
 				while (token != NULL)
@@ -128,11 +105,9 @@ int main()
 			}
 			else
 			{
-				wait(NULL);
-				
+				wait(NULL);				
 			}
-		}
-		
+		}		
 
 	}
 }
